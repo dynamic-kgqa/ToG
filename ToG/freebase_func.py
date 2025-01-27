@@ -11,10 +11,16 @@ sparql_head_entities_extract = """PREFIX ns: <http://rdf.freebase.com/ns/>\nSELE
 sparql_id = """PREFIX ns: <http://rdf.freebase.com/ns/>\nSELECT DISTINCT ?tailEntity\nWHERE {\n  {\n    ?entity ns:type.object.name ?tailEntity .\n    FILTER(?entity = ns:%s)\n  }\n  UNION\n  {\n    ?entity <http://www.w3.org/2002/07/owl#sameAs> ?tailEntity .\n    FILTER(?entity = ns:%s)\n  }\n}"""
     
 def check_end_word(s):
+    """
+    Note: This function is not used.
+    """
     words = [" ID", " code", " number", "instance of", "website", "URL", "inception", "image", " rate", " count"]
     return any(s.endswith(word) for word in words)
 
 def abandon_rels(relation):
+    """
+    TODO: Find the equivalent relations in Yago. 
+    """
     if relation == "type.object.type" or relation == "type.object.name" or relation.startswith("common.") or relation.startswith("freebase.") or "sameAs" in relation:
         return True
 
@@ -28,9 +34,21 @@ def execurte_sparql(sparql_query):
 
 
 def replace_relation_prefix(relations):
+    """
+    TODO: Find the equivalent prefix in Yago.
+
+    MARK: The potential problem with this is that different relations may have different prefixes in Yago.
+    There might be a function that we have written that replaces all types of prefixes.
+    """
     return [relation['relation']['value'].replace("http://rdf.freebase.com/ns/","") for relation in relations]
 
 def replace_entities_prefix(entities):
+    """
+    TODO: Find the equivalent prefix in Yago.
+
+    MARK: The potential problem with this is that different entities may have different prefixes in Yago.
+    There might be a function that we have written that replaces all types of prefixes.
+    """
     return [entity['tailEntity']['value'].replace("http://rdf.freebase.com/ns/","") for entity in entities]
 
 
@@ -58,6 +76,9 @@ from sentence_transformers import SentenceTransformer
 
 
 def clean_relations(string, entity_id, head_relations):
+    """
+    Extracts the relations and their scores from the output string.
+    """
     pattern = r"{\s*(?P<relation>[^()]+)\s+\(Score:\s+(?P<score>[0-9.]+)\)}"
     relations=[]
     for match in re.finditer(pattern, string):
@@ -85,6 +106,9 @@ def if_all_zero(topn_scores):
 
 
 def clean_relations_bm25_sent(topn_relations, topn_scores, entity_id, head_relations):
+    """
+    Note: This function can be ignored if you are not using BM25 or SentenceBERT.
+    """
     relations = []
     if if_all_zero(topn_scores):
         topn_scores = [float(1/len(topn_scores))] * len(topn_scores)

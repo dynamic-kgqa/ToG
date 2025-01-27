@@ -63,6 +63,9 @@ def compute_bm25_similarity(query, corpus, width=3):
 
 
 def clean_relations(string, entity_id, head_relations):
+    """
+    Extracts the relations and their scores from the output string.
+    """
     pattern = r"{\s*(?P<relation>[^()]+)\s+\(Score:\s+(?P<score>[0-9.]+)\)}"
     relations=[]
     for match in re.finditer(pattern, string):
@@ -90,6 +93,9 @@ def if_all_zero(topn_scores):
 
 
 def clean_relations_bm25_sent(topn_relations, topn_scores, entity_id, head_relations):
+    """
+    Note: This function can be ignored if you are not using BM25 or SentenceBERT.
+    """
     relations = []
     if if_all_zero(topn_scores):
         topn_scores = [float(1/len(topn_scores))] * len(topn_scores)
@@ -176,6 +182,9 @@ def if_true(prompt):
 
 
 def generate_without_explored_paths(question, args):
+    """
+    Generate the answer for the question by directly prompting the LLM with a CoT prompt.
+    """
     prompt = cot_prompt + "\n\nQ: " + question + "\nA:"
     response = run_llm(prompt, args.temperature_reasoning, args.max_length, args.opeani_api_keys, args.LLM_type)
     return response
