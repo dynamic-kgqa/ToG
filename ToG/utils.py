@@ -1,7 +1,8 @@
 from prompt_list import *
+import sys
 import json
 import time
-import openai
+from openai import OpenAI
 import re
 from prompt_list import *
 from rank_bm25 import BM25Okapi
@@ -110,12 +111,17 @@ def clean_relations_bm25_sent(topn_relations, topn_scores, entity_id, head_relat
 
 
 def run_llm(prompt, temperature, max_tokens, opeani_api_keys, engine="gpt-3.5-turbo"):
+    client = None
     if "llama" in engine.lower():
-        openai.api_key = "EMPTY"
-        openai.api_base = "http://localhost:8000/v1"  # your local llama server port
-        engine = openai.Model.list()["data"][0]["id"]
+        sys.exit("Llama is not supported in this version.")        
+        # openai.api_key = "EMPTY"
+        # openai.api_base = "http://localhost:8000/v1"  # your local llama server port
+        # engine = openai.Model.list()["data"][0]["id"]
     else:
-        openai.api_key = opeani_api_keys
+        # This operation of creating a client on each call is not efficient.
+        # This will be fixed in the next version.
+        client = OpenAI(api_key=opeani_api_keys)
+        # openai.api_key = opeani_api_keys
 
     messages = [{"role":"system","content":"You are an AI assistant that helps people find information."}]
     message_prompt = {"role":"user","content":prompt}
@@ -123,7 +129,7 @@ def run_llm(prompt, temperature, max_tokens, opeani_api_keys, engine="gpt-3.5-tu
     f = 0
     while(f == 0):
         try:
-            response = openai.ChatCompletion.create(
+            response = client.chat.completions.create(
                     model=engine,
                     messages = messages,
                     temperature=temperature,
@@ -132,7 +138,8 @@ def run_llm(prompt, temperature, max_tokens, opeani_api_keys, engine="gpt-3.5-tu
                     presence_penalty=0)
             result = response["choices"][0]['message']['content']
             f = 1
-        except:
+        except Exception as e:
+            print(e)
             print("openai error, retry")
             time.sleep(2)
     return result
