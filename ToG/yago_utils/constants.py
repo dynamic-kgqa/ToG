@@ -53,5 +53,6 @@ INVALID_PROPERTIES = {
     "yago:length",
     "schema:gtin",
     "schema:logo",
-    "schema:geo"
+    "schema:geo",
+    "schema:sameAs"
 }
