@@ -3,9 +3,6 @@ The code for paper: ["Think-on-Graph: Deep and Responsible Reasoning of Large La
 
 The original repo for ToG is [Here](https://github.com/GasolSun36/ToG).
 
-## News!
-Our paper is accepted by ICLR 2024 🥳🥳🥳.
-
 
 ## Here is the illustration of ToG:
 

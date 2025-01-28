@@ -144,7 +144,6 @@ def run_llm(prompt, temperature, max_tokens, opeani_api_keys, engine="gpt-3.5-tu
             print("openai error, retry")
             time.sleep(2)
     return result
-
     
 def all_unknown_entity(entity_candidates):
     return all(candidate == "UnName_Entity" for candidate in entity_candidates)
