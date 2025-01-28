@@ -86,7 +86,7 @@ def replace_relation_prefix(relations):
 
 def replace_entities_prefix(entities):
     """
-    TODO: Find the equivalent prefix in Yago.
+    Replaces the prefix value (URL) with the prefix key.
 
     MARK: The potential problem with this is that different entities may have different prefixes in Yago.
     There might be a function that we have written that replaces all types of prefixes.
@@ -104,8 +104,10 @@ def replace_entities_prefix(entities):
     return replaced_entities
 
 
+
+
 def id2entity_name_or_type(entity_id):
-    sparql_query = sparql_id % (PREFIX_STRING, entity_id, entity_id)
+    sparql_query = sparql_id % (PREFIX_STRING, entity_id)
     sparql = SPARQLWrapper(SPARQLPATH)
     sparql.setQuery(sparql_query)
     sparql.setReturnFormat(JSON)
@@ -204,10 +206,8 @@ def relation_search_prune(entity_id, entity_name, pre_relations, pre_head, quest
     tail_relations = list(set(tail_relations))
     total_relations = head_relations+tail_relations
     total_relations.sort()  # make sure the order in prompt is always equal
-    print("Total relations: ", total_relations)
     
     if args.prune_tools == "llm":
-        sys.exit("LLM is not supported for Yago.")
         prompt = construct_relation_prune_prompt(question, entity_name, total_relations, args)
 
         result = run_llm(prompt, args.temperature_exploration, args.max_length, args.opeani_api_keys, args.LLM_type)
@@ -237,7 +237,7 @@ def entity_search(entity, relation, head=True):
 
 
     entity_ids = replace_entities_prefix(entities)
-    new_entity = [entity for entity in entity_ids if entity.startswith("m.")]
+    new_entity = [entity for entity in entity_ids]# if entity.startswith("m.")]
     return new_entity
 
 
@@ -332,7 +332,4 @@ def reasoning(question, cluster_chain_of_entities, args):
     else:
         return False, response
     
-
-if __name__=="__main__":
-    print(PREFIX_STRING)
 

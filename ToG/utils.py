@@ -136,7 +136,8 @@ def run_llm(prompt, temperature, max_tokens, opeani_api_keys, engine="gpt-3.5-tu
                     max_tokens=max_tokens,
                     frequency_penalty=0,
                     presence_penalty=0)
-            result = response["choices"][0]['message']['content']
+            response.choices
+            result = response.choices[0].message.content
             f = 1
         except Exception as e:
             print(e)

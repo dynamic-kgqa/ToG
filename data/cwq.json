@@ -3,6 +3,24 @@
         "ID": "WebQTrn-1259_1997cb4922db71983be26e6a509950f4",
         "compositionality_type": "composition",
         "created": "2018-02-12T21:58:58",
+        "machine_question": "Who is the leader of Belgium?",
+        "question": "Who is the leader of Belgium?",
+        "sparql": "PREFIX ns: <http://rdf.freebase.com/ns/>\nSELECT DISTINCT ?x\nWHERE {\nFILTER (?x != ?c)\nFILTER (!isLiteral(?x) OR lang(?x) = '' OR langMatches(lang(?x), 'en'))\n?c ns:music.artist.concert_tours ns:m.010qhfmm . \n?c ns:people.person.education ?y .\n?y ns:education.education.institution ?x .\n?x ns:common.topic.notable_types ns:m.01y2hnl .\n?y ns:education.education.degree ns:m.019v9k .\n}\n",
+        "webqsp_ID": "WebQTrn-1259",
+        "webqsp_question": "where did brad paisley graduate from college",
+        "topic_entity": {
+            "m.010qhfmm": "Country Nation World Tour",
+            "m.019v9k": "Bachelor's degree"
+        },
+        "answer": "Europe",
+        "qid_topic_entity": {
+            "yago:Belgium": "Belgium"
+        }
+    },
+    {
+        "ID": "WebQTrn-1259_1997cb4922db71983be26e6a509950f4",
+        "compositionality_type": "composition",
+        "created": "2018-02-12T21:58:58",
         "machine_question": "where did the artist had a concert tour named Country Nation World Tour graduate from college",
         "question": "Where did the \"Country Nation World Tour\" concert artist go to college?",
         "sparql": "PREFIX ns: <http://rdf.freebase.com/ns/>\nSELECT DISTINCT ?x\nWHERE {\nFILTER (?x != ?c)\nFILTER (!isLiteral(?x) OR lang(?x) = '' OR langMatches(lang(?x), 'en'))\n?c ns:music.artist.concert_tours ns:m.010qhfmm . \n?c ns:people.person.education ?y .\n?y ns:education.education.institution ?x .\n?x ns:common.topic.notable_types ns:m.01y2hnl .\n?y ns:education.education.degree ns:m.019v9k .\n}\n",
