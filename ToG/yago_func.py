@@ -1,32 +1,64 @@
 from SPARQLWrapper import SPARQLWrapper, JSON
 from utils import *
+from yago_utils.constants import PREFIXES, INVALID_PROPERTIES
+import sys
 
-SPARQLPATH = "http://192.168.80.12:8890/sparql"  # depend on your own internal address and port, shown in Freebase folder's readme.md
+SPARQLPATH = "http://localhost:8080/bigdata/sparql"  # Default path. Depends on your own internal address and port, shown in Freebase folder's readme.md
+
+def get_prefix_string() -> str:
+    """
+    Returns the prefixes as a substring of the SPARQL format.
+    """
+    prefix_list = [f"PREFIX {key}: <{value}>" for key, value in PREFIXES.items()]
+    prefix_string = "\n".join(prefix_list)
+    return prefix_string
+
+PREFIX_STRING = get_prefix_string()
+
+# This can be done because the prefixes are unique.
+PREFIX_VALUES = {value: key for key, value in PREFIXES.items()}
+
+def get_invalid_properties() -> list[str]:
+    """
+    Returns the invalid properties in URL format.
+    """
+    invalid_properties = []
+    for property in INVALID_PROPERTIES:
+        if ":" in property:
+            prefix, property = property.split(":")
+            if prefix in PREFIXES:
+                invalid_properties.append(f"{PREFIXES[prefix]}{property}")
+    return invalid_properties
 
 # pre-defined sparqls
-sparql_head_relations = """\nPREFIX ns: <http://rdf.freebase.com/ns/>\nSELECT ?relation\nWHERE {\n  ns:%s ?relation ?x .\n}"""
-sparql_tail_relations = """\nPREFIX ns: <http://rdf.freebase.com/ns/>\nSELECT ?relation\nWHERE {\n  ?x ?relation ns:%s .\n}"""
-sparql_tail_entities_extract = """PREFIX ns: <http://rdf.freebase.com/ns/>\nSELECT ?tailEntity\nWHERE {\nns:%s ns:%s ?tailEntity .\n}""" 
-sparql_head_entities_extract = """PREFIX ns: <http://rdf.freebase.com/ns/>\nSELECT ?tailEntity\nWHERE {\n?tailEntity ns:%s ns:%s  .\n}"""
-sparql_id = """PREFIX ns: <http://rdf.freebase.com/ns/>\nSELECT DISTINCT ?tailEntity\nWHERE {\n  {\n    ?entity ns:type.object.name ?tailEntity .\n    FILTER(?entity = ns:%s)\n  }\n  UNION\n  {\n    ?entity <http://www.w3.org/2002/07/owl#sameAs> ?tailEntity .\n    FILTER(?entity = ns:%s)\n  }\n}"""
-    
+sparql_head_relations = """\n%s\n SELECT ?relation\nWHERE {\n %s ?relation ?x .\n}"""
+sparql_tail_relations = """\n%s\nSELECT ?relation\nWHERE {\n  ?x ?relation %s .\n}"""
+sparql_tail_entities_extract = """%s\nSELECT ?tailEntity\nWHERE {\n%s %s ?tailEntity .\n}""" 
+sparql_head_entities_extract = """%s\nSELECT ?tailEntity\nWHERE {\n?tailEntity %s %s  .\n}"""
+sparql_id = """
+%s\n
+SELECT DISTINCT ?tailEntity\n
+WHERE {\n
+    ?entity owl:sameAs ?tailEntity .\n
+    FILTER(?entity = %s)\n
+}""" # We ignore relations such as schema:sameAs
+
 def check_end_word(s):
     """
-    Note: This function is not used.
+    Note: This function is not used for Freebase.
     """
     words = [" ID", " code", " number", "instance of", "website", "URL", "inception", "image", " rate", " count"]
     return any(s.endswith(word) for word in words)
 
 def abandon_rels(relation):
     """
-    TODO: Find the equivalent relations in Yago. 
+    MARK: This function gets all invalid properties (deemed by us) for Yago.
     """
-    if relation == "type.object.type" or relation == "type.object.name" or relation.startswith("common.") or relation.startswith("freebase.") or "sameAs" in relation:
-        return True
+    return relation in INVALID_PROPERTIES
 
 
-def execurte_sparql(sparql_query):
-    sparql = SPARQLWrapper(SPARQLPATH)
+def execurte_sparql(sparql_query, sparql_path = SPARQLPATH):
+    sparql = SPARQLWrapper(sparql_path)
     sparql.setQuery(sparql_query)
     sparql.setReturnFormat(JSON)
     results = sparql.query().convert()
@@ -39,21 +71,43 @@ def replace_relation_prefix(relations):
 
     MARK: The potential problem with this is that different relations may have different prefixes in Yago.
     There might be a function that we have written that replaces all types of prefixes.
+
+    Also, this means that we may be better off NOT removing the prefixes in the first place.
+    Instead, we will have to change the other functions that use this function to handle the prefixes.
     """
-    return [relation['relation']['value'].replace("http://rdf.freebase.com/ns/","") for relation in relations]
+    # Instead of removing the entire prefix url, we just replace with the prefix key.
+    replaced_relations = []
+    for relation in relations:
+        for prefix, value in PREFIXES.items():
+            if relation['relation']['value'].startswith(value):
+                replaced_relations.append(relation['relation']['value'].replace(value, f"{prefix}:"))
+                break
+    return replaced_relations
 
 def replace_entities_prefix(entities):
     """
-    TODO: Find the equivalent prefix in Yago.
+    Replaces the prefix value (URL) with the prefix key.
 
     MARK: The potential problem with this is that different entities may have different prefixes in Yago.
     There might be a function that we have written that replaces all types of prefixes.
+
+    Also, this means that we may be better off NOT removing the prefixes in the first place.
+    Instead, we will have to change the other functions that use this function to handle the prefixes.
     """
-    return [entity['tailEntity']['value'].replace("http://rdf.freebase.com/ns/","") for entity in entities]
+    # Instead of removing the entire prefix url, we just replace with the prefix key.
+    replaced_entities = []
+    for entity in entities:
+        for prefix, value in PREFIXES.items():
+            if entity['tailEntity']['value'].startswith(value):
+                replaced_entities.append(entity['tailEntity']['value'].replace(value, f"{prefix}:"))
+                break
+    return replaced_entities
+
+
 
 
 def id2entity_name_or_type(entity_id):
-    sparql_query = sparql_id % (entity_id, entity_id)
+    sparql_query = sparql_id % (PREFIX_STRING, entity_id)
     sparql = SPARQLWrapper(SPARQLPATH)
     sparql.setQuery(sparql_query)
     sparql.setReturnFormat(JSON)
@@ -63,7 +117,7 @@ def id2entity_name_or_type(entity_id):
     else:
         return results["results"]["bindings"][0]['tailEntity']['value']
     
-from freebase_func import *
+# from freebase_func import *
 from prompt_list import *
 import json
 import time
@@ -131,11 +185,11 @@ def construct_entity_score_prompt(question, relation, entity_candidates):
 
 
 def relation_search_prune(entity_id, entity_name, pre_relations, pre_head, question, args):
-    sparql_relations_extract_head = sparql_head_relations % (entity_id)
+    sparql_relations_extract_head = sparql_head_relations % (PREFIX_STRING, entity_id)
     head_relations = execurte_sparql(sparql_relations_extract_head)
     head_relations = replace_relation_prefix(head_relations)
     
-    sparql_relations_extract_tail= sparql_tail_relations % (entity_id)
+    sparql_relations_extract_tail= sparql_tail_relations % (PREFIX_STRING, entity_id)
     tail_relations = execurte_sparql(sparql_relations_extract_tail)
     tail_relations = replace_relation_prefix(tail_relations)
 
@@ -175,15 +229,15 @@ def relation_search_prune(entity_id, entity_name, pre_relations, pre_head, quest
     
 def entity_search(entity, relation, head=True):
     if head:
-        tail_entities_extract = sparql_tail_entities_extract% (entity, relation)
+        tail_entities_extract = sparql_tail_entities_extract% (PREFIX_STRING, entity, relation)
         entities = execurte_sparql(tail_entities_extract)
     else:
-        head_entities_extract = sparql_head_entities_extract% (entity, relation)
+        head_entities_extract = sparql_head_entities_extract% (PREFIX_STRING, entity, relation)
         entities = execurte_sparql(head_entities_extract)
 
 
     entity_ids = replace_entities_prefix(entities)
-    new_entity = [entity for entity in entity_ids if entity.startswith("m.")]
+    new_entity = [entity for entity in entity_ids]# if entity.startswith("m.")]
     return new_entity
 
 
@@ -278,6 +332,4 @@ def reasoning(question, cluster_chain_of_entities, args):
     else:
         return False, response
     
-
-
 

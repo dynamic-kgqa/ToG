@@ -1,13 +1,7 @@
 # ToG
-
-## News!
-Our paper is accepted by ICLR 2024 ! 🥳🥳🥳
-
-## ToG is moved to a new repo [ToG](https://github.com/IDEA-FinAI/ToG).
-
-
 The code for paper: ["Think-on-Graph: Deep and Responsible Reasoning of Large Language Model on Knowledge Graph"](https://arxiv.org/pdf/2307.07697.pdf).
 
+The original repo for ToG is [Here](https://github.com/GasolSun36/ToG).
 
 
 ## Here is the illustration of ToG:
@@ -77,3 +71,6 @@ If you interested or inspired by this work, you can cite us by:
 
 # Claims
 This project uses the Apache 2.0 protocol. The project assumes no legal responsibility for any of the model's output and will not be held liable for any damages that may result from the use of the resources and output.
+
+# FYI
+We are looking for self-motivated interns at IDEA (Shenzhen). If you are interested in the topics of LLMs and KGs, please send us your resume by email. Our email address is xuchengjin@idea.edu.cn

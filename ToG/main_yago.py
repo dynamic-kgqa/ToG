@@ -1,9 +1,9 @@
 from tqdm import tqdm
 import argparse
 from utils import *
-from freebase_func import *
+from yago_func import *
 import random
-from client import *
+# from client import *
 
 
 if __name__ == '__main__':
@@ -36,7 +36,7 @@ if __name__ == '__main__':
     print("Start Running ToG on %s dataset." % args.dataset)
     for data in tqdm(datas):
         question = data[question_string]
-        topic_entity = data['topic_entity']
+        topic_entity = data['qid_topic_entity']
         cluster_chain_of_entities = []
         if len(topic_entity) == 0:
             results = generate_without_explored_paths(question, args)
