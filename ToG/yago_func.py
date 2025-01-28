@@ -1,18 +1,19 @@
 from SPARQLWrapper import SPARQLWrapper, JSON
 from utils import *
 from yago_utils.constants import PREFIXES, INVALID_PROPERTIES
+import sys
 
 SPARQLPATH = "http://localhost:8080/bigdata/sparql"  # Default path. Depends on your own internal address and port, shown in Freebase folder's readme.md
 
-def get_prefixes() -> str:
+def get_prefix_string() -> str:
     """
     Returns the prefixes as a substring of the SPARQL format.
     """
-    prefixes = [f"PREFIX {key}: <{value}>" for key, value in PREFIXES.items()]
-    prefix_string = "\n".join(prefixes)
+    prefix_list = [f"PREFIX {key}: <{value}>" for key, value in PREFIXES.items()]
+    prefix_string = "\n".join(prefix_list)
     return prefix_string
 
-PREFIXES = get_prefixes()
+PREFIX_STRING = get_prefix_string()
 
 # This can be done because the prefixes are unique.
 PREFIX_VALUES = {value: key for key, value in PREFIXES.items()}
@@ -30,7 +31,7 @@ def get_invalid_properties() -> list[str]:
     return invalid_properties
 
 # pre-defined sparqls
-sparql_head_relations = """\n%s\nSELECT ?relation\nWHERE {\n %s ?relation ?x .\n}"""
+sparql_head_relations = """\n%s\n SELECT ?relation\nWHERE {\n %s ?relation ?x .\n}"""
 sparql_tail_relations = """\n%s\nSELECT ?relation\nWHERE {\n  ?x ?relation %s .\n}"""
 sparql_tail_entities_extract = """%s\nSELECT ?tailEntity\nWHERE {\n%s %s ?tailEntity .\n}""" 
 sparql_head_entities_extract = """%s\nSELECT ?tailEntity\nWHERE {\n?tailEntity %s %s  .\n}"""
@@ -81,6 +82,7 @@ def replace_relation_prefix(relations):
             if relation['relation']['value'].startswith(value):
                 replaced_relations.append(relation['relation']['value'].replace(value, f"{prefix}:"))
                 break
+    return replaced_relations
 
 def replace_entities_prefix(entities):
     """
@@ -99,10 +101,11 @@ def replace_entities_prefix(entities):
             if entity['tailEntity']['value'].startswith(value):
                 replaced_entities.append(entity['tailEntity']['value'].replace(value, f"{prefix}:"))
                 break
+    return replaced_entities
 
 
 def id2entity_name_or_type(entity_id):
-    sparql_query = sparql_id % (PREFIXES, entity_id, entity_id)
+    sparql_query = sparql_id % (PREFIX_STRING, entity_id, entity_id)
     sparql = SPARQLWrapper(SPARQLPATH)
     sparql.setQuery(sparql_query)
     sparql.setReturnFormat(JSON)
@@ -112,7 +115,7 @@ def id2entity_name_or_type(entity_id):
     else:
         return results["results"]["bindings"][0]['tailEntity']['value']
     
-from freebase_func import *
+# from freebase_func import *
 from prompt_list import *
 import json
 import time
@@ -180,11 +183,11 @@ def construct_entity_score_prompt(question, relation, entity_candidates):
 
 
 def relation_search_prune(entity_id, entity_name, pre_relations, pre_head, question, args):
-    sparql_relations_extract_head = sparql_head_relations % (PREFIXES, entity_id)
+    sparql_relations_extract_head = sparql_head_relations % (PREFIX_STRING, entity_id)
     head_relations = execurte_sparql(sparql_relations_extract_head)
     head_relations = replace_relation_prefix(head_relations)
     
-    sparql_relations_extract_tail= sparql_tail_relations % (PREFIXES, entity_id)
+    sparql_relations_extract_tail= sparql_tail_relations % (PREFIX_STRING, entity_id)
     tail_relations = execurte_sparql(sparql_relations_extract_tail)
     tail_relations = replace_relation_prefix(tail_relations)
 
@@ -201,8 +204,10 @@ def relation_search_prune(entity_id, entity_name, pre_relations, pre_head, quest
     tail_relations = list(set(tail_relations))
     total_relations = head_relations+tail_relations
     total_relations.sort()  # make sure the order in prompt is always equal
+    print("Total relations: ", total_relations)
     
     if args.prune_tools == "llm":
+        sys.exit("LLM is not supported for Yago.")
         prompt = construct_relation_prune_prompt(question, entity_name, total_relations, args)
 
         result = run_llm(prompt, args.temperature_exploration, args.max_length, args.opeani_api_keys, args.LLM_type)
@@ -224,10 +229,10 @@ def relation_search_prune(entity_id, entity_name, pre_relations, pre_head, quest
     
 def entity_search(entity, relation, head=True):
     if head:
-        tail_entities_extract = sparql_tail_entities_extract% (PREFIXES, entity, relation)
+        tail_entities_extract = sparql_tail_entities_extract% (PREFIX_STRING, entity, relation)
         entities = execurte_sparql(tail_entities_extract)
     else:
-        head_entities_extract = sparql_head_entities_extract% (PREFIXES, entity, relation)
+        head_entities_extract = sparql_head_entities_extract% (PREFIX_STRING, entity, relation)
         entities = execurte_sparql(head_entities_extract)
 
 
@@ -328,5 +333,6 @@ def reasoning(question, cluster_chain_of_entities, args):
         return False, response
     
 
-
+if __name__=="__main__":
+    print(PREFIX_STRING)
 
