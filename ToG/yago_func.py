@@ -232,7 +232,7 @@ def entity_search(entity, relation, head=True):
         tail_entities_extract = sparql_tail_entities_extract% (PREFIX_STRING, entity, relation)
         entities = execurte_sparql(tail_entities_extract)
     else:
-        head_entities_extract = sparql_head_entities_extract% (PREFIX_STRING, entity, relation)
+        head_entities_extract = sparql_head_entities_extract% (PREFIX_STRING, relation, entity)
         entities = execurte_sparql(head_entities_extract)
 
 
