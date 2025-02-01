@@ -35,13 +35,17 @@ sparql_head_relations = """\n%s\n SELECT ?relation\nWHERE {\n %s ?relation ?x .\
 sparql_tail_relations = """\n%s\nSELECT ?relation\nWHERE {\n  ?x ?relation %s .\n}"""
 sparql_tail_entities_extract = """%s\nSELECT ?tailEntity\nWHERE {\n%s %s ?tailEntity .\n}""" 
 sparql_head_entities_extract = """%s\nSELECT ?tailEntity\nWHERE {\n?tailEntity %s %s  .\n}"""
+# Gets the possible labels and IDs (e.g. Wikidata) of the entity. Priority is given to the label.
+# We ignore relations such as schema:sameAs
+# EDIT: Ignored owl:sameAs as well.
 sparql_id = """
 %s\n
 SELECT DISTINCT ?tailEntity\n
 WHERE {\n
-    ?entity owl:sameAs ?tailEntity .\n
-    FILTER(?entity = %s)\n
-}""" # We ignore relations such as schema:sameAs
+        %s rdfs:label ?tailEntity .\n
+        FILTER (lang(?tailEntity) = 'en')\n
+}
+"""
 
 def check_end_word(s):
     """
