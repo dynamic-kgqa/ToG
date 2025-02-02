@@ -7,3 +7,6 @@ argparse
 # if need to use BM25, SentenceBERT as pruning tools.
 rank_bm25
 sentence_transformers 
+
+# Huggingface
+datasets
