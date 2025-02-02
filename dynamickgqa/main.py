@@ -42,9 +42,9 @@ if __name__ == '__main__':
 
     parser = argparse.ArgumentParser()
     parser.add_argument("--data_path", type=str,
-                        default="./dynamickgqa_test_subset.json", help="the path to the data.")
+                        default="./dynamickgqa_test.json", help="the path to the data.")
     parser.add_argument("--output_file", type=str,
-                        default="dynamickgqa_test_subset_output.json", help="the output file name.")
+                        default="dynamickgqa_test_output.jsonl", help="the output file name.")
     parser.add_argument("--max_length", type=int,
                         default=256, help="the max length of LLMs output.")
     parser.add_argument("--temperature", type=int,
@@ -58,6 +58,7 @@ if __name__ == '__main__':
     nlp = setup_ner()
 
     datas, question_string = prepare_dataset(args.data_path)
+    output_data = []
     for index, row in enumerate(datas):
         prompt = entity_prompt + "\n\nQ: " + row[question_string] + "\nA: "
         results = run_llm(prompt, args.temperature, args.max_length, args.opeani_api_keys, args.LLM_type)
@@ -74,6 +75,11 @@ if __name__ == '__main__':
         # print(entities)
         row["qid_topic_entity"] = entities
 
+        output_data.append(row)
+
         if (index+1) % 5 == 0:
-            with open(args.output_file, 'w') as f:
-                f.write(json.dumps(datas))
+            with open(args.output_file, 'a+') as f:
+                for data in output_data:
+                    f.write(json.dumps(data) + "\n")
+            output_data = []
+            print(f"Processed {index+1} rows")
