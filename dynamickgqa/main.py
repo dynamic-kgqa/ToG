@@ -1,6 +1,16 @@
+"""
+This file is the main entry point for the DynamicKGQA processing. 
+It is responsible for loading the data, and saving the data to a json file.
+It is also responsible for loading the data, running the LLM, and extracting the entities from the LLM output.
+"""
+
+import json
+import argparse
 from datasets import load_dataset
 
 from constants import HF_PATH, MAIN_COLUMNS
+from utils import run_llm, prepare_dataset, setup_ner, get_entities, get_spacy_entities
+from prompt_list import entity_prompt
 
 def load_hf_dataset(data_path = HF_PATH, *, 
                               split: str = 'test', subset: tuple[int, int] = None,
@@ -24,6 +34,32 @@ def load_json(file_path):
     re_squad = load_dataset("json", data_files=data_files, split="test")
     print(re_squad[0])
 
+
 if __name__ == '__main__':
-    data = data_to_json(split='test', columns=MAIN_COLUMNS, json_file_name="dynamickgqa_test.json")
-    print(data)
+    # First, save the data to a json file, then run the rest of the code
+    # data_to_json(HF_PATH, json_file_name="dynamickgqa_test_subset.json", split='test', subset=(0, 10), columns=MAIN_COLUMNS)
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--data_path", type=str,
+                        default="./dynamickgqa_test_subset.json", help="the path to the data.")
+    parser.add_argument("--max_length", type=int,
+                        default=256, help="the max length of LLMs output.")
+    parser.add_argument("--temperature", type=int,
+                        default=0, help="the temperature")
+    parser.add_argument("--LLM_type", type=str,
+                        default="gpt-3.5-turbo", help="base LLM model.")
+    parser.add_argument("--opeani_api_keys", type=str,
+                        default="", help="if the LLM_type is gpt-3.5-turbo or gpt-4, you need add your own openai api keys.")
+    args = parser.parse_args()
+
+    nlp = setup_ner()
+
+    datas, question_string = prepare_dataset(args.data_path)
+    for row in datas:
+        prompt = entity_prompt + "\n\nQ: " + row[question_string] + "\nA: "
+        results = run_llm(prompt, args.temperature, args.max_length, args.opeani_api_keys, args.LLM_type)
+
+        entities = get_entities(results)
+        if not entities or len(entities) == 0: entities = get_spacy_entities(nlp, results)
+
+        row["entities"] = entities

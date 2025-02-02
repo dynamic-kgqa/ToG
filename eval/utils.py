@@ -1,7 +1,7 @@
 import json
 import re
 
-DYANAMIC_KGQA_PATH = '../data/dynamickgqa_test_subset.json'
+DYANAMIC_KGQA_PATH = '../data/dynamickgqa_test.json'
 
 def prepare_dataset_for_eval(dataset_name, output_file):
     if dataset_name == 'cwq':
