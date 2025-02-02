@@ -1,5 +1,5 @@
 # For Yago Sqlite3 database
-DB_NAME = "yago_all.db"
+DB_NAME = "yago_utils/yago_all.db"
 
 
 # For Yago SPARQL KG

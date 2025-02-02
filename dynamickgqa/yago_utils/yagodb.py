@@ -4,8 +4,8 @@ from abc import ABC
 import sqlite3
 import argparse
 
-from classes import Item, Property, Claim
-from constants import DB_NAME
+from yago_utils.classes import Item, Property, Claim
+from yago_utils.constants import DB_NAME
 
 class YagoDB:
     """Class for interacting with a Yago DB.
@@ -231,6 +231,18 @@ class YagoDB:
         """
         self._curr.execute(query)
         return self._curr.fetchall()
+
+    def get_entity_counts_from_labels(self, entity_labels: List[str]) -> dict:
+        """
+        Get entities from labels.
+        This is a specific query that will be useful for dynamicKGQA entity linking.
+        """
+        query = f"""SELECT item_label, count FROM items 
+                       WHERE item_label in ({', '.join([f"'{entity}'" for entity in entity_labels])})
+                       ORDER BY count DESC"""
+        entity_counts = self.query(query)
+        entity_counts_dict = {result[0]: result[1] for result in entity_counts}
+        return entity_counts_dict
 
 def main():
     parser = argparse.ArgumentParser()

@@ -43,6 +43,8 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument("--data_path", type=str,
                         default="./dynamickgqa_test_subset.json", help="the path to the data.")
+    parser.add_argument("--output_file", type=str,
+                        default="dynamickgqa_test_subset_output.json", help="the output file name.")
     parser.add_argument("--max_length", type=int,
                         default=256, help="the max length of LLMs output.")
     parser.add_argument("--temperature", type=int,
@@ -56,7 +58,7 @@ if __name__ == '__main__':
     nlp = setup_ner()
 
     datas, question_string = prepare_dataset(args.data_path)
-    for row in datas:
+    for index, row in enumerate(datas):
         prompt = entity_prompt + "\n\nQ: " + row[question_string] + "\nA: "
         results = run_llm(prompt, args.temperature, args.max_length, args.opeani_api_keys, args.LLM_type)
 
@@ -65,9 +67,13 @@ if __name__ == '__main__':
         if not entity_labels or len(entity_labels) == 0: entity_labels = get_spacy_entities(nlp, results)
 
         row["entity_labels"] = entity_labels
-        print(entity_labels)
 
         # Get the entities from the labels
         entities = get_entities_from_labels(entity_labels)
-        print(entities)
-        row["entities"] = entities
+        entity_to_label = {entity: label for label, entity in entities.items()}
+        # print(entities)
+        row["qid_topic_entity"] = entities
+
+        if (index+1) % 5 == 0:
+            with open(args.output_file, 'w') as f:
+                f.write(json.dumps(datas))
