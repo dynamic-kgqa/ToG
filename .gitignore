@@ -6,3 +6,5 @@ __pycache__/
 
 server_log**
 **.log
+
+*.db

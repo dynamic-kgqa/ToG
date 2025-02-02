@@ -11,6 +11,7 @@ from datasets import load_dataset
 from constants import HF_PATH, MAIN_COLUMNS
 from utils import run_llm, prepare_dataset, setup_ner, get_entities, get_spacy_entities
 from prompt_list import entity_prompt
+from yago_func import get_entities_from_labels
 
 def load_hf_dataset(data_path = HF_PATH, *, 
                               split: str = 'test', subset: tuple[int, int] = None,
@@ -59,7 +60,14 @@ if __name__ == '__main__':
         prompt = entity_prompt + "\n\nQ: " + row[question_string] + "\nA: "
         results = run_llm(prompt, args.temperature, args.max_length, args.opeani_api_keys, args.LLM_type)
 
-        entities = get_entities(results)
-        if not entities or len(entities) == 0: entities = get_spacy_entities(nlp, results)
+        # Despite the function being named get_entities, it actually gets the possible entity labels from the results
+        entity_labels = get_entities(results)
+        if not entity_labels or len(entity_labels) == 0: entity_labels = get_spacy_entities(nlp, results)
 
+        row["entity_labels"] = entity_labels
+        print(entity_labels)
+
+        # Get the entities from the labels
+        entities = get_entities_from_labels(entity_labels)
+        print(entities)
         row["entities"] = entities
