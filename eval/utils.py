@@ -1,6 +1,7 @@
 import json
 import re
 
+DYANAMIC_KGQA_PATH = '../data/dynamickgqa_test_subset.json'
 
 def prepare_dataset_for_eval(dataset_name, output_file):
     if dataset_name == 'cwq':
@@ -39,11 +40,19 @@ def prepare_dataset_for_eval(dataset_name, output_file):
         with open('../data/creak.json',encoding='utf-8') as f:
             datas = json.load(f)
         question_string = 'sentence'
+    elif dataset_name == 'dynamickgqa': # MARK: Added case for 'dynamickgqa'
+        with open(DYANAMIC_KGQA_PATH,encoding='utf-8') as f:
+            datas = json.load(f)
+        question_string = 'question'
     else:
         print("dataset not found, you should pick from {cwq, webqsp, grailqa, simpleqa, qald, webquestions, trex, zeroshotre, creak}.")
         exit(-1)
     with open(output_file, encoding='utf-8') as f:
-        output_datas = json.load(f)
+        # If the output file is json, else if it is jsonl
+        if output_file.endswith('.json'):
+            output_datas = json.load(f)
+        else:
+            output_datas = [json.loads(line) for line in f]
     return datas, question_string, output_datas
 
 
@@ -97,6 +106,11 @@ def align(dataset_name, question_string, data, ground_truth_datas):
     elif dataset_name == 'creak':
         answer = origin_data['label']
         answer_list.append(answer)
+
+    elif dataset_name == 'dynamickgqa':
+        answers = origin_data["answer_readable"]
+        for answer in answers:
+            answer_list.append(answer)
 
     return list(set(answer_list))
     

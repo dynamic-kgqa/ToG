@@ -10,9 +10,11 @@ def load_hf_dataset(data_path = HF_PATH, *,
         dataset = dataset.select_columns(columns)
     return dataset
 
-def data_to_json(data_path = HF_PATH, *, json_file_name = "data.json", split, subset, columns):
+def data_to_json(data_path = HF_PATH, *, json_file_name = "data.json", 
+                 split: str = 'test', subset: tuple[int, int] = None, columns: list[str] = None):
     dataset = load_hf_dataset(data_path, split=split, subset=subset, columns=columns)
-    bytes_num = dataset.to_json(json_file_name, lines=False)
+    bytes_num = dataset.to_json(json_file_name, lines=False, batch_size=dataset.num_rows)
+    # bytes_num = 0
     print(f"Data saved to {json_file_name}")
     # print(dataset[0])
     return bytes_num
@@ -23,5 +25,5 @@ def load_json(file_path):
     print(re_squad[0])
 
 if __name__ == '__main__':
-    data = data_to_json(split='test', subset=(0, 10), columns=MAIN_COLUMNS)
+    data = data_to_json(split='test', columns=MAIN_COLUMNS, json_file_name="dynamickgqa_test.json")
     print(data)
