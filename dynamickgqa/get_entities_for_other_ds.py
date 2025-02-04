@@ -1,9 +1,8 @@
 """
-This file is the main entry point for the DynamicKGQA processing. 
-It is responsible for loading the data, and saving the data to a json file.
+This file is used for getting entities for other datasets, similar to the main.py file.
 It is also responsible for loading the data, running the LLM, and extracting the entities from the LLM output.
 """
-
+import sys
 import json
 import argparse
 from datasets import load_dataset
@@ -44,9 +43,13 @@ if __name__ == '__main__':
 
     parser = argparse.ArgumentParser()
     parser.add_argument("--data_path", type=str,
-                        default="./dynamickgqa_test.json", help="the path to the data.")
+                        default="/home/ubuntu/ClaimBenchKG_Baselines/ToG/data/cwq.json", help="the path to the data.")
     parser.add_argument("--output_file", type=str,
-                        default="dynamickgqa_test_output.jsonl", help="the output file name.")
+                        default="/home/ubuntu/ClaimBenchKG_Baselines/ToG/data/cwq.jsonl", help="the output file name.")
+    parser.add_argument("--question_string", type=str,
+                        default="question", help="the question string.")
+    parser.add_argument("--completed", type=int,
+                        default=0, help="the number of rows already completed.")
     parser.add_argument("--max_length", type=int,
                         default=256, help="the max length of LLMs output.")
     parser.add_argument("--temperature", type=int,
@@ -59,10 +62,10 @@ if __name__ == '__main__':
 
     nlp = setup_ner()
 
-    datas, question_string = prepare_dataset(args.data_path)
+    datas, question_string = prepare_dataset(args.data_path, question_string=args.question_string)
     output_data = []
 
-    completed = 0
+    completed = args.completed
     for index, row in tqdm(enumerate(datas), total=len(datas)):
         if index < completed: continue
 
@@ -96,3 +99,11 @@ if __name__ == '__main__':
             row["qid_topic_entity"] = f"Error at index {index}"
             output_data.append(row)
             continue
+
+if len(output_data) > 0:
+    with open(args.output_file, 'a+') as f:
+        for data in output_data:
+            f.write(json.dumps(data) + "\n")
+    print(f"Processed {len(datas)} rows")
+
+# Command (Not included)
