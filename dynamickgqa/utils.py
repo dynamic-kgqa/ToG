@@ -28,16 +28,16 @@ def run_llm(prompt, temperature, max_tokens, opeani_api_keys, engine="gpt-4.0"):
                     presence_penalty=0)
             result = response.choices[0].message.content
             f = 1
-        except:
+        except Exception as e:
             print("openai error, retry")
             time.sleep(2)
     # print("end openai")
     return result
 
-def prepare_dataset(dataset_path):
+def prepare_dataset(dataset_path, question_string='question'):
     with open(dataset_path,encoding='utf-8') as f:
         datas = json.load(f)
-    question_string = 'question'
+    question_string = 'question' if question_string is None else question_string
     return datas, question_string
 
 def get_entities(text):

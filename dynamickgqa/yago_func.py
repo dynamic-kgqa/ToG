@@ -18,6 +18,9 @@ def get_prefix_string() -> str:
 
 PREFIX_STRING = get_prefix_string()
 
+WD_PREFIX = "wd:"
+WD_PREFIX_URL = "http://www.wikidata.org/entity/"
+
 # This can be done because the prefixes are unique.
 PREFIX_VALUES = {value: key for key, value in PREFIXES.items()}
 
@@ -26,7 +29,22 @@ get_sparql_entities_from_labels = """
 %s
 SELECT DISTINCT ?entity ?label WHERE {
     VALUES ?label { %s }
-    ?entity rdfs:label ?label
+    {
+        ?entity rdfs:label ?label
+    } UNION {
+        ?entity schema:alternateName ?label
+    }
+    FILTER (lang(?label) = 'en')
+}
+"""
+
+get_sparql_entities_from_qids = """
+%s
+SELECT DISTINCT ?entity ?qid WHERE {
+    VALUES ?qid { %s }
+    {
+        ?entity owl:sameAs ?qid
+    }
 }
 """
 
@@ -55,7 +73,8 @@ def get_entities_from_labels(labels) -> dict:
     Get entities from labels.
     """
     # Get the entities from the labels
-    yago_labels = [f"\'{label}\'@en" for label in labels]
+    # yago_labels: escape the labels with single quotes and @en, and deal with single quotes in the labels
+    yago_labels = [f"'''{label.replace("'", "\\'")}'''@en" for label in labels]
     sparql_query = get_sparql_entities_from_labels % (PREFIX_STRING, " ".join(yago_labels))
     results = execurte_sparql(sparql_query)
 
@@ -69,10 +88,32 @@ def get_entities_from_labels(labels) -> dict:
         if entities.get(label) is None:
             entities[label] = entity
         else:
-            if (entity in entities_counts) and (entities_counts[entity] > entities_counts[entities[label]]):
+            if (entity in entities_counts) and \
+                ((entities[label] not in entities_counts) or \
+                 (entities_counts[entity] > entities_counts[entities[label]])):
                 entities[label] = entity
 
     # entities = {results["label"]["value"]: results["entity"]["value"] for results in results}
     # Replace the entities with the prefix
     replaced_entities = replace_entities_prefix(entities)
+    return replaced_entities
+
+def get_entities_from_qids(qids) -> dict:
+    """
+    Get entities from qids.
+    """
+    # Get the entities from the labels
+    # yago_labels: escape the labels with single quotes and @en, and deal with single quotes in the labels
+    yago_qids = [f"{WD_PREFIX}{qid}" for qid in qids]
+    sparql_query = get_sparql_entities_from_qids % (PREFIX_STRING, " ".join(yago_qids))
+    results = execurte_sparql(sparql_query)
+
+    # Get wd: to yago:
+    entities = {result["qid"]["value"]: result["entity"]["value"] for result in results}
+    # Replace the entities with the prefix
+    replaced_entities = replace_entities_prefix(entities)
+
+    # Remove the wd: prefix from qids
+    replaced_entities = {qid.replace(WD_PREFIX_URL, ""): entity for qid, entity in replaced_entities.items()}
+
     return replaced_entities
