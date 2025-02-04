@@ -1,0 +1,47 @@
+[
+    {
+        "id": "97855",
+        "question_num": 0,
+        "question": "What family does the alpaca belong to, considering its evolutionary lineage through its parent taxa?",
+        "answer": "Camelidae",
+        "answer_readable": "Camelidae",
+        "answer_uri": "http://yago-knowledge.org/resource/Camelidae",
+        "entity_labels": [
+            "alpaca"
+        ],
+        "qid_topic_entity": {
+            "yago:Alpaca": "alpaca"
+        }
+    },
+    {
+        "id": "97855",
+        "question_num": 2,
+        "question": "What is the highest-level taxonomic group that includes both chevrotains and camels in their evolutionary tree?",
+        "answer": "Even-toed_ungulate",
+        "answer_readable": "Even-toed ungulate",
+        "answer_uri": "http://yago-knowledge.org/resource/Even-toed_ungulate",
+        "entity_labels": [
+            "chevrotains",
+            "camels"
+        ],
+        "qid_topic_entity": {
+            "yago:Chevrotain": "chevrotains"
+        }
+    },
+    {
+        "id": "39548",
+        "question_num": 0,
+        "question": "Which football club owned Villa Park and participated in the 2017-18 EFL Championship?",
+        "answer": "Aston_Villa_F_u002E_C_u002E_",
+        "answer_readable": "Aston Villa F.C.",
+        "answer_uri": "http://yago-knowledge.org/resource/Aston_Villa_F_u002E_C_u002E_",
+        "entity_labels": [
+            "Villa Park",
+            "2017-18 EFL Championship"
+        ],
+        "qid_topic_entity": {
+            "yago:Villa_Park": "Villa Park",
+            "yago:2017_u2013_18_EFL_Championship": "2017-18 EFL Championship"
+        }
+    }
+]
