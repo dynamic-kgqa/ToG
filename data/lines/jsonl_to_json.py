@@ -10,6 +10,6 @@ def jsonl_to_json(jsonl_file_path, json_file_path):
         f.write(json.dumps(datas, indent=4))
 
 if __name__ == '__main__':
-    jsonl_file_path = "./WebQSP.jsonl"
-    json_file_path = "./WebQSP.json"
+    jsonl_file_path = "./dynamickgqa_test_output.jsonl"
+    json_file_path = "./dynamickgqa_test_output.json"
     jsonl_to_json(jsonl_file_path, json_file_path)
