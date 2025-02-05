@@ -1,7 +1,7 @@
 {
     "dataset": "dynamickgqa",
     "method": "ToG",
-    "Exact Match": 1.0,
-    "Right Samples": 10,
-    "Error Sampels": 0
+    "Exact Match": 0.21782178217821782,
+    "Right Samples": 22,
+    "Error Sampels": 79
 }

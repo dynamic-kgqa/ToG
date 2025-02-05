@@ -9,6 +9,9 @@ from rank_bm25 import BM25Okapi
 from sentence_transformers import util
 from sentence_transformers import SentenceTransformer
 
+from bedrock_functions import build_mistral_request_body, invoke_bedrock_endpoint
+from bedrock_functions import MISTRAL_MODEL_ID
+
 def retrieve_top_docs(query, docs, model, width=3):
     """
     Retrieve the topn most relevant documents for the given query.
@@ -117,11 +120,14 @@ def run_llm(prompt, temperature, max_tokens, opeani_api_keys, engine="gpt-3.5-tu
         # openai.api_key = "EMPTY"
         # openai.api_base = "http://localhost:8000/v1"  # your local llama server port
         # engine = openai.Model.list()["data"][0]["id"]
-    else:
+    elif "gpt" in engine.lower():
         # This operation of creating a client on each call is not efficient.
         # This will be fixed in the next version.
         client = OpenAI(api_key=opeani_api_keys)
         # openai.api_key = opeani_api_keys
+    else:
+        # Most likely a bedrock model
+        return run_bedrock_llm(prompt, temperature, max_tokens, opeani_api_keys, engine)
 
     messages = [{"role":"system","content":"You are an AI assistant that helps people find information."}]
     message_prompt = {"role":"user","content":prompt}
@@ -144,7 +150,27 @@ def run_llm(prompt, temperature, max_tokens, opeani_api_keys, engine="gpt-3.5-tu
             print("openai error, retry")
             time.sleep(2)
     return result
-    
+
+
+def run_bedrock_llm(prompt, temperature, max_tokens, opeani_api_keys, engine="mistral"):
+    """
+    Run the Bedrock model.
+    """
+    if engine == "mistral":
+        # Prepare the request body
+        request_body = build_mistral_request_body(prompt, max_tokens, temperature)
+        # Invoke the Bedrock endpoint
+        response = invoke_bedrock_endpoint(request_body["body"], model_id=request_body["modelId"])
+        # sys.exit("Mistral is not supported in this version.")
+        return response["outputs"][0]["text"]
+    else:
+        # Still use mistral for now
+        # Prepare the request body
+        request_body = build_mistral_request_body(prompt, temperature, max_tokens)
+        # Invoke the Bedrock endpoint
+        response = invoke_bedrock_endpoint(request_body, model_id=MISTRAL_MODEL_ID)
+        return response["outputs"][0]["text"]
+
 def all_unknown_entity(entity_candidates):
     return all(candidate == "UnName_Entity" for candidate in entity_candidates)
 
@@ -242,6 +268,10 @@ def prepare_dataset(dataset_name):
         with open('../data/creak.json',encoding='utf-8') as f:
             datas = json.load(f)
         question_string = 'sentence'
+    elif dataset_name == 'dynamickgqa':
+        with open('../data/dynamickgqa_test_output.json',encoding='utf-8') as f:
+            datas = json.load(f)
+        question_string = 'question'
     else:
         print("dataset not found, you should pick from {cwq, webqsp, grailqa, simpleqa, qald, webquestions, trex, zeroshotre, creak}.")
         exit(-1)
