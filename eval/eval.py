@@ -19,7 +19,8 @@ if __name__ == '__main__':
         answers = align(args.dataset, question_string, data, ground_truth_datas)
         results = data['results']
         if check_string(results):
-            response = clean_results(results)
+            # response = clean_results(results)
+            response = extract_content(results)
             if response=="NULL":
                 response = results
             else:
@@ -41,3 +42,5 @@ if __name__ == '__main__':
 
     save_result2json(args.dataset, num_right, num_error, len(output_datas), "ToG")
     
+# Command
+# python eval.py --dataset webqsp --output_file /home/ubuntu/ClaimBenchKG_Baselines/ToG/ToG/ToG_webqsp.jsonl --constraints_refuse True

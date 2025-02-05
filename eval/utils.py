@@ -41,7 +41,7 @@ def prepare_dataset_for_eval(dataset_name, output_file):
             datas = json.load(f)
         question_string = 'sentence'
     elif dataset_name == 'dynamickgqa': # MARK: Added case for 'dynamickgqa'
-        with open(DYANAMIC_KGQA_PATH,encoding='utf-8') as f:
+        with open('../data/dynamickgqa_test_output.json',encoding='utf-8') as f:
             datas = json.load(f)
         question_string = 'question'
     else:
@@ -64,11 +64,12 @@ def align(dataset_name, question_string, data, ground_truth_datas):
             answers = origin_data["answers"]
         else:
             answers = origin_data["answer"]
-        for answer in answers:
-            alias = answer['aliases']
-            ans = answer['answer']
-            alias.append(ans)
-            answer_list.extend(alias)
+        # for answer in answers:
+        #     alias = answer['aliases']
+        #     ans = answer['answer']
+        #     alias.append(ans)
+        #     answer_list.extend(alias)
+        answer_list.append(answers)
 
     elif dataset_name == 'webqsp':
         answers = origin_data["Parses"]
@@ -108,9 +109,9 @@ def align(dataset_name, question_string, data, ground_truth_datas):
         answer_list.append(answer)
 
     elif dataset_name == 'dynamickgqa':
-        answers = origin_data["answer_readable"]
-        for answer in answers:
-            answer_list.append(answer)
+        answer = origin_data["answer_readable"]
+        # for answer in answers:
+        answer_list.append(answer)
 
     return list(set(answer_list))
     
