@@ -20,7 +20,32 @@ bedrock_runtime = boto3.client(
 
 ATHROPIC_MODEL_ID = "us.anthropic.claude-3-5-sonnet-20241022-v2:0"
 
-def build_anthropic_request_body(
+def build_anthropic_request_body(user_prompt, max_tokens=1000, temperature=0):
+    request_body = {
+    "modelId": "us.anthropic.claude-3-5-sonnet-20241022-v2:0",
+    "contentType": "application/json",
+    "accept": "application/json",
+    "body": json.dumps({
+        "anthropic_version": "bedrock-2023-05-31",
+        "max_tokens": max_tokens,
+        "temperature": temperature,
+        # "system": system_prompt,
+        "messages": [
+            {
+                "role": "user",
+                "content": [
+                    {
+                        "type": "text",
+                        "text": user_prompt
+                    }
+                ]
+            }
+        ]
+    })
+    }
+    return request_body
+
+def build_anthropic_request_body_2(
     system_prompt: str,
     user_prompt: str,
     max_tokens: int,
@@ -47,16 +72,51 @@ def build_anthropic_request_body(
     # "system" and "messages" to reflect the multi-message format.
     
     # user_prompt = user_prompt.replace(system_prompt, "")
-    system_prompt = "You are helpful assistant."
-    request_body = {
-        "anthropic_version": "bedrock-2023-05-31",
+    system_prompt = "You are a helpful assistant."
+    # request_body = {
+    #     "anthropic_version": "bedrock-2023-05-31",
+    #     "max_tokens": max_tokens,
+    #     "temperature": temperature,
+    #     # "top_k": 250,
+    #     # "stop_sequences": [],
+    #     # "top_p": 0.999,
         
-        "system": system_prompt,
-        "messages": [
-            {"role": "user", "content": user_prompt}
-        ],
-        "max_tokens": max_tokens,
-        "temperature": temperature
+    #     "system": system_prompt,
+    #     "messages": [
+    #         {
+    #             "role": "user", 
+    #             "content": [
+    #                 {
+    #                     "type": "text",
+    #                     "text": "Hello Useless Claude"
+    #                 }
+    #             ]
+    #         }
+    #     ]
+    # }
+    request_body = {
+        "modelId": "anthropic.claude-3-5-sonnet-20241022-v2:0",
+        "contentType": "application/json",
+        "accept": "application/json",
+        "body": {
+            "anthropic_version": "bedrock-2023-05-31",
+            "max_tokens": 200,
+            "top_k": 250,
+            "stop_sequences": [],
+            "temperature": 1,
+            "top_p": 0.999,
+            "messages": [
+            {
+                "role": "user",
+                "content": [
+                {
+                    "type": "text",
+                    "text": "hello world"
+                }
+                ]
+            }
+            ]
+        }
     }
     return request_body
     

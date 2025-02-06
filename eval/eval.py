@@ -19,8 +19,9 @@ if __name__ == '__main__':
         answers = align(args.dataset, question_string, data, ground_truth_datas)
         results = data['results']
         if check_string(results):
-            # response = clean_results(results)
-            response = extract_content(results)
+            # # response = clean_results(results)
+            # response = extract_content(results)
+            response = results
             if response=="NULL":
                 response = results
             else:

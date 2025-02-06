@@ -297,6 +297,12 @@ def half_stop(question, cluster_chain_of_entities, depth, args):
     answer = generate_answer(question, cluster_chain_of_entities, args)
     save_2_jsonl(question, answer, cluster_chain_of_entities, file_name=args.dataset)
 
+# Used for multiple threads
+def half_stop_no_write(question, cluster_chain_of_entities, depth, args):
+    print("No new knowledge added during search depth %d, stop searching." % depth)
+    answer = generate_answer(question, cluster_chain_of_entities, args)
+    return answer
+
 
 def generate_answer(question, cluster_chain_of_entities, args): 
     prompt = answer_prompt + question + '\n'

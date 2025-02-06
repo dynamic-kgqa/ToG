@@ -9,8 +9,9 @@ from rank_bm25 import BM25Okapi
 from sentence_transformers import util
 from sentence_transformers import SentenceTransformer
 
-from bedrock_functions import build_mistral_request_body, invoke_bedrock_endpoint
-from bedrock_functions import MISTRAL_MODEL_ID
+from bedrock_functions import build_mistral_request_body, build_anthropic_request_body, \
+    build_command_r_request_body, invoke_bedrock_endpoint
+from bedrock_functions import MISTRAL_MODEL_ID, ATHROPIC_MODEL_ID
 
 def retrieve_top_docs(query, docs, model, width=3):
     """
@@ -163,6 +164,24 @@ def run_bedrock_llm(prompt, temperature, max_tokens, opeani_api_keys, engine="mi
         response = invoke_bedrock_endpoint(request_body["body"], model_id=request_body["modelId"])
         # sys.exit("Mistral is not supported in this version.")
         return response["outputs"][0]["text"]
+    elif engine == "anthropic":
+        # Prepare the request body
+        request_body = build_anthropic_request_body(
+            user_prompt=prompt, max_tokens=max_tokens, temperature=temperature)
+        # Invoke the Bedrock endpoint
+        model_id = request_body["modelId"]
+        body = request_body["body"]
+        content_type = request_body.get("contentType", "application/json")
+        response = invoke_bedrock_endpoint(model_id=model_id,
+                        request_body=body,
+                        content_type=content_type)
+        return response["content"][0]["text"]
+    elif engine == "command_r":
+        # Prepare the request body
+        request_body = build_command_r_request_body(prompt, max_tokens, temperature)
+        # Invoke the Bedrock endpoint
+        response = invoke_bedrock_endpoint(request_body["body"], model_id=request_body["modelId"])
+        return response["text"]
     else:
         # Still use mistral for now
         # Prepare the request body
