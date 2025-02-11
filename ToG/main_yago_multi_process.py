@@ -1,7 +1,6 @@
 from tqdm import tqdm
 import argparse
 from multiprocessing import Pool
-from concurrent.futures import ThreadPoolExecutor, as_completed
 from functools import partial
 
 from utils import *
@@ -99,17 +98,17 @@ def main(args):
 
     datas = datas[start:end]
 
-    with ThreadPoolExecutor(max_workers=args.n) as executor:
-        futures = [
-            executor.submit(
+    # for index, data in tqdm(enumerate(datas), total=len(datas)):
+    with Pool(processes=args.n) as p:
+        for process_row in tqdm(
+            p.imap(
                 partial(
                     process, args=args, question_string=question_string
-                ), data
-            )
-            for data in datas
-        ]
-        for future in tqdm(as_completed(futures), total=len(datas)):
-            question, result, cluster_chain_of_entities = future.result()
+                ), datas
+            ),
+            total=len(datas),
+        ):
+            question, result, cluster_chain_of_entities = process_row
             save_2_jsonl(question, result, cluster_chain_of_entities, file_name=args.dataset)
 
 if __name__ == '__main__':

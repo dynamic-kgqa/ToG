@@ -10,8 +10,8 @@ from sentence_transformers import util
 from sentence_transformers import SentenceTransformer
 
 from bedrock_functions import build_mistral_request_body, build_anthropic_request_body, \
-    build_command_r_request_body, invoke_bedrock_endpoint
-from bedrock_functions import MISTRAL_MODEL_ID, ATHROPIC_MODEL_ID
+    build_command_r_request_body, build_nova_request_body, invoke_bedrock_endpoint
+from bedrock_functions import MISTRAL_MODEL_ID, ANTHROPIC_MODEL_ID
 
 def retrieve_top_docs(query, docs, model, width=3):
     """
@@ -182,6 +182,12 @@ def run_bedrock_llm(prompt, temperature, max_tokens, opeani_api_keys, engine="mi
         # Invoke the Bedrock endpoint
         response = invoke_bedrock_endpoint(request_body["body"], model_id=request_body["modelId"])
         return response["text"]
+    elif engine == "nova":
+        # Prepare the request body
+        request_body = build_nova_request_body(prompt, max_tokens, temperature)
+        # Invoke the Bedrock endpoint
+        response = invoke_bedrock_endpoint(request_body["body"], model_id=request_body["modelId"])
+        return response["output"]["message"]["content"][0]["text"]
     else:
         # Still use mistral for now
         # Prepare the request body
@@ -237,7 +243,8 @@ def generate_without_explored_paths(question, args):
     """
     Generate the answer for the question by directly prompting the LLM with a CoT prompt.
     """
-    prompt = cot_prompt + "\n\nQ: " + question + "\nA:"
+    system_message = "SYSTEM MESSAGE: Respond in less than 3 sentences."
+    prompt = system_message + "\n\n" + cot_prompt + "\n\nQ: " + question + "\nA:"
     response = run_llm(prompt, args.temperature_reasoning, args.max_length, args.opeani_api_keys, args.LLM_type)
     return response
 
