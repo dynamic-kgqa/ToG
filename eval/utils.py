@@ -132,11 +132,24 @@ def check_refuse(string):
     refuse_words = ["however", "sorry"]
     return any(word in string.lower() for word in refuse_words)
 
+def normalize(s: str) -> str:
+    """Lower text and remove punctuation, articles and extra whitespace."""
+    s = s.lower()
+    string_punctuation = r"""!"#$%&'()*+,-./:;<=>?@[\]^_`{|}~""" # Taken from string.punctuation
+    exclude = set(string_punctuation)
+    s = "".join(char for char in s if char not in exclude)
+    s = re.sub(r"\b(a|an|the)\b", " ", s)
+    # remove <pad> token:
+    s = re.sub(r"\b(<pad>)\b", " ", s)
+    s = " ".join(s.split())
+    return s
 
 def exact_match(response, answers):
-    clean_result = response.strip().replace(" ","").lower()
+    # clean_result = response.strip().replace(" ","").lower()
+    clean_result = normalize(response)
     for answer in answers:
-        clean_answer = answer.strip().replace(" ","").lower()
+        # clean_answer = answer.strip().replace(" ","").lower()
+        clean_answer = normalize(answer)
         if clean_result == clean_answer or clean_result in clean_answer or clean_answer in clean_result:
             return True
     return False

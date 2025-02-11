@@ -18,11 +18,14 @@ bedrock_runtime = boto3.client(
         region_name='us-east-1'
     )
 
-ATHROPIC_MODEL_ID = "us.anthropic.claude-3-5-sonnet-20241022-v2:0"
+ANTHROPIC_MODEL_ID = "us.anthropic.claude-3-5-sonnet-20241022-v2:0"
+# ANTHOPIC_MODEL_ID = "us.anthropic.claude-3-5-haiku-20241022-v1:0"
+# ANTHROPIC_MODEL_ID = "us.anthropic.claude-3-sonnet-20240229-v1:0"
 
 def build_anthropic_request_body(user_prompt, max_tokens=1000, temperature=0):
     request_body = {
     "modelId": "us.anthropic.claude-3-5-sonnet-20241022-v2:0",
+    # "modelId": "us.anthropic.claude-3-sonnet-20240229-v1:0",
     "contentType": "application/json",
     "accept": "application/json",
     "body": json.dumps({
@@ -277,8 +280,8 @@ def invoke_bedrock_endpoint(
     model_id: str,
     region_name: str = "us-east-1",
     content_type = 'application/json',
-    max_retries: int = 3,
-    backoff_factor: float = 2.0
+    max_retries: int = 10,
+    backoff_factor: float = 5.0
 ) -> dict:
     """
     Invokes the Bedrock endpoint with a given request body and model ID,
