@@ -8,3 +8,5 @@ server_log**
 **.log
 
 *.db
+
+.env

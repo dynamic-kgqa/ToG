@@ -99,6 +99,10 @@ def main(args):
 
     datas = datas[start:end]
 
+    if args.avoid_existing:
+        existing_answers = get_jsonl(args.dataset)
+        datas = avoid_existing(datas, existing_answers, question_string)
+
     with ThreadPoolExecutor(max_workers=args.n) as executor:
         futures = [
             executor.submit(
@@ -142,6 +146,8 @@ if __name__ == '__main__':
                         default=-1, help="end index.")
     parser.add_argument("--n", type=int,
                         default=2, help="number of processes.")
+    parser.add_argument("--avoid_existing", type=bool,
+                        default=True, help="avoid reprocessing existing rows.")
     args = parser.parse_args()
 
     main(args)
