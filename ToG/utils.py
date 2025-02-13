@@ -230,23 +230,12 @@ def clean_scores(string, entity_candidates):
     else:
         print("All entities are created equal.")
         return [1/len(entity_candidates)] * len(entity_candidates)
-    
-outfile = None
+
 def save_2_jsonl(question, answer, cluster_chain_of_entities, file_name):
-    # global outfile
-    # if outfile is None:
-    #     print("Creating a new file.")
-    #     outfile = open("ToG_{}.jsonl".format(file_name), "a+")
     dict = {"question":question, "results": answer, "reasoning_chains": cluster_chain_of_entities}
     with open("ToG_{}.jsonl".format(file_name), "a") as outfile:
         json_str = json.dumps(dict)
         outfile.write(json_str + "\n")
-
-def close_outfile():
-    global outfile
-    if outfile is not None:
-        outfile.close()
-        outfile = None
 
 def get_jsonl(file_name):
     if not os.path.exists("ToG_{}.jsonl".format(file_name)):
