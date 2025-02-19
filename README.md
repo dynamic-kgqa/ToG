@@ -1,16 +1,8 @@
 # ToG
-The code for paper: ["Think-on-Graph: Deep and Responsible Reasoning of Large Language Model on Knowledge Graph"](https://arxiv.org/pdf/2307.07697.pdf).
+This is the forked repository of ToG, that has been modified to serve as baseline for the DynamicKGQA project. The original repository was designed to work with Wikidata and Freebase, but we have made modifications to make it work with YAGO as well.
 
 The original repo for ToG is [Here](https://github.com/GasolSun36/ToG).
 
-
-## Here is the illustration of ToG:
-
-![image](https://github.com/GasolSun36/ToG/blob/main/assets/demo.png)
-
-## The pipeline of ToG:
-
-![image](https://github.com/GasolSun36/ToG/blob/main/assets/methods.png)
 
 ## Project Structure
 - `requirements.txt`: Pip environment file.
@@ -25,13 +17,16 @@ The original repo for ToG is [Here](https://github.com/GasolSun36/ToG).
   - `server_urls.txt`: Wikidata server urls, copy from `Wikidata/`.
   - `main_freebase.py`: The main file of ToG where Freebase as KG source. See `README.md` for details.
   - `main_wiki.py`: Same as above but using Wikidata as KG source. See `README.md` for details.
-  - `prompt_list.py`: The prompts for the ToG to pruning, reasoning and generating.
+  - `prompt_list_freebase.py`: The Freebase-oriented prompts for the ToG to pruning, reasoning and generating.
   - `freebase_func.py`: All the functions used in `main_freebase.py`.
   - `wiki_func.py`: All the functions used in `main_wiki.py`.
+  - `main_yago.py`: The main file of ToG where YAGO as KG source. See `README.md` for details.
+  - `yago_func.py`: All the functions used in `main_yago.py`.
+  - `prompt_list.py`: The YAGO-oriented prompts for the ToG to pruning, reasoning and generating.
   - `utils.py`: All the functions used in ToG.
 
 ## Get started
-Before running ToG, please ensure that you have successfully installed either **Freebase** or **Wikidata** on your local machine. The comprehensive installation instructions and necessary configuration details can be found in the `README.md` file located within the respective folder.
+Before running ToG, please ensure that you have successfully installed **Yago**, **Freebase** or **Wikidata** on your local machine. The comprehensive installation instructions and necessary configuration details can be found in the `README.md` file located within the respective folder.
 
 The required libraries for running ToG can be found in `requirements.txt`.
 
@@ -46,31 +41,12 @@ Upon obtaining the result file, such as `ToG_cwq.jsonl`, you should using the `j
 
 
 # How to cite
-If you interested or inspired by this work, you can cite us by:
+Since this work is intended to be a baseline for the DynamicKGQA project, please cite the original work as follows:
+TBD
 ```sh
-@misc{sun2023thinkongraph,
-      title={Think-on-Graph: Deep and Responsible Reasoning of Large Language Model with Knowledge Graph}, 
-      author={Jiashuo Sun and Chengjin Xu and Lumingyuan Tang and Saizhuo Wang and Chen Lin and Yeyun Gong and Heung-Yeung Shum and Jian Guo},
-      year={2023},
-      eprint={2307.07697},
-      archivePrefix={arXiv},
-      primaryClass={cs.CL}
-}
+
 ```
 
-# Experiment:
+# License
 
-![image](https://github.com/GasolSun36/ToG/blob/main/assets/experiments.png)
-
-
-# Application:
-
-![image](https://github.com/GasolSun36/ToG/blob/main/assets/application.png)
-
-
-
-# Claims
-This project uses the Apache 2.0 protocol. The project assumes no legal responsibility for any of the model's output and will not be held liable for any damages that may result from the use of the resources and output.
-
-# FYI
-We are looking for self-motivated interns at IDEA (Shenzhen). If you are interested in the topics of LLMs and KGs, please send us your resume by email. Our email address is xuchengjin@idea.edu.cn
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
