@@ -26,7 +26,7 @@ The original repo for ToG is [Here](https://github.com/GasolSun36/ToG).
   - `utils.py`: All the functions used in ToG.
 
 ## Get started
-Before running ToG, please ensure that you have successfully installed either **Freebase** or **Wikidata** on your local machine. The comprehensive installation instructions and necessary configuration details can be found in the `README.md` file located within the respective folder.
+Before running ToG, please ensure that you have successfully installed **Yago**, **Freebase** or **Wikidata** on your local machine. The comprehensive installation instructions and necessary configuration details can be found in the `README.md` file located within the respective folder.
 
 The required libraries for running ToG can be found in `requirements.txt`.
 
@@ -41,31 +41,12 @@ Upon obtaining the result file, such as `ToG_cwq.jsonl`, you should using the `j
 
 
 # How to cite
-If you interested or inspired by this work, you can cite us by:
+Since this work is intended to be a baseline for the DynamicKGQA project, please cite the original work as follows:
+TBD
 ```sh
-@misc{sun2023thinkongraph,
-      title={Think-on-Graph: Deep and Responsible Reasoning of Large Language Model with Knowledge Graph}, 
-      author={Jiashuo Sun and Chengjin Xu and Lumingyuan Tang and Saizhuo Wang and Chen Lin and Yeyun Gong and Heung-Yeung Shum and Jian Guo},
-      year={2023},
-      eprint={2307.07697},
-      archivePrefix={arXiv},
-      primaryClass={cs.CL}
-}
+
 ```
 
-# Experiment:
+# License
 
-![image](https://github.com/GasolSun36/ToG/blob/main/assets/experiments.png)
-
-
-# Application:
-
-![image](https://github.com/GasolSun36/ToG/blob/main/assets/application.png)
-
-
-
-# Claims
-This project uses the Apache 2.0 protocol. The project assumes no legal responsibility for any of the model's output and will not be held liable for any damages that may result from the use of the resources and output.
-
-# FYI
-We are looking for self-motivated interns at IDEA (Shenzhen). If you are interested in the topics of LLMs and KGs, please send us your resume by email. Our email address is xuchengjin@idea.edu.cn
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
