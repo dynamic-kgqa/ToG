@@ -10,3 +10,8 @@ server_log**
 *.db
 
 .env
+
+# Project Specific 
+ToG/archive/
+eval/archive/
+dynamickgqa/archive/
