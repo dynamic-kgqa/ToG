@@ -231,18 +231,32 @@ def clean_scores(string, entity_candidates):
         print("All entities are created equal.")
         return [1/len(entity_candidates)] * len(entity_candidates)
 
+def get_jsonl_path_for_backup(file_name):
+    file_path = "ToG_{}.jsonl".format(file_name)
+    if not os.path.exists(file_path):
+        # Create the file
+        open(file_path, "w").close()
+    return file_path
+
+def get_jsonl_path_for_write(file_name):
+    file_path = "ToG_{}.jsonl".format(file_name)
+    if not os.path.exists(file_path):
+        # Create the file
+        open(file_path, "w").close()
+    return file_path
+
 def save_2_jsonl(question, answer, cluster_chain_of_entities, file_name):
     dict = {"question":question, "results": answer, "reasoning_chains": cluster_chain_of_entities}
     with open("ToG_{}.jsonl".format(file_name), "a") as outfile:
         json_str = json.dumps(dict)
         outfile.write(json_str + "\n")
 
-def get_jsonl(file_name):
-    if not os.path.exists("ToG_{}.jsonl".format(file_name)):
-        return []
-    with open("ToG_{}.jsonl".format(file_name), "r") as f:
-        data = [json.loads(line) for line in f]
-    return data
+def save_2_jsonl_batch(output, file_name):
+    file_path = "ToG_{}.jsonl".format(file_name)
+    with open(file_path, "a") as outfile:
+        for output_dict in output:
+            json_str = json.dumps(output_dict)
+            outfile.write(json_str + "\n")
 
 def avoid_existing(datas, existing_answers, question_string):
     existing_questions = [existing_answer[question_string] for existing_answer in existing_answers]
