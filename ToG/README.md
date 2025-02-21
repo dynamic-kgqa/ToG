@@ -35,3 +35,7 @@ python main_yago.py \  # if you wanna use Wikidata as KG source, run main_wiki.p
 All the pruning and reasoning prompts utilized in the experiment are in the `prompt_list.py` file.
 
 For eval, please see `eval/README.md` file.
+
+## Scaling up with Yago
+
+Note that there is a file called [main_yago_multi_thread_batched.py](./main_yago_multi_thread_batched.py) that can be used to speed up performance in case you have a large number of questions to answer. This file is a multi-threaded version of the main_yago.py file that processes the rows in batches. The number of threads and the batch size can be adjusted in the arguments provided to the file.

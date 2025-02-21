@@ -1,12 +1,14 @@
 from tqdm import tqdm
 import argparse
 from multiprocessing import Pool
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from functools import partial
 
 from utils import *
 from yago_func import *
 import random
 # from client import *
+import time
 
 def process(data, args, question_string) -> tuple[str, str, list]:
     question = data[question_string]
@@ -86,10 +88,9 @@ def process(data, args, question_string) -> tuple[str, str, list]:
         return question, results, cluster_chain_of_entities
     except Exception as e:
         results = generate_without_explored_paths(question, args)
-        results = "Error, falling back to LLM: " + results
+        results = "Error, falling back to LLM: " + (results if results is not None else "null")
         # save_2_jsonl(question, results, [], file_name=args.dataset)
         return question, results, []
-
 
 def main(args):
     datas, question_string = prepare_dataset(args.dataset)
@@ -98,18 +99,47 @@ def main(args):
 
     datas = datas[start:end]
 
-    # for index, data in tqdm(enumerate(datas), total=len(datas)):
-    with Pool(processes=args.n) as p:
-        for process_row in tqdm(
-            p.imap(
+    if args.avoid_existing:
+        json_backup_path = get_jsonl_path_for_backup(args.dataset)
+        with open(json_backup_path, "r") as json_backup_ref:
+            existing_answers = [json.loads(line) for line in json_backup_ref]
+        datas = avoid_existing(datas, existing_answers, question_string)
+    print("Number of existing questions: ", len(existing_answers))
+    print("Number of questions: ", len(datas))
+
+    batch_size = args.batch_size
+    for i in range(0, len(datas), batch_size):
+        print("Processing batch %d" % (i//batch_size))
+        output = main_batch(datas[i:i+batch_size], question_string, args)
+        save_2_jsonl_batch(output, file_name=args.dataset)
+
+    print("Finish Running ToG on %s dataset." % args.dataset)
+
+def main_batch(datas, question_string, args):
+    start_time = time.time()
+    output = []
+
+    with ThreadPoolExecutor(max_workers=args.n) as executor:
+        futures = [
+            executor.submit(
                 partial(
                     process, args=args, question_string=question_string
-                ), datas
-            ),
-            total=len(datas),
-        ):
-            question, result, cluster_chain_of_entities = process_row
-            save_2_jsonl(question, result, cluster_chain_of_entities, file_name=args.dataset)
+                ), data
+            )
+            for data in datas
+        ]
+        for future in tqdm(as_completed(futures), total=len(datas)):
+            try:
+                question, result, cluster_chain_of_entities = future.result(timeout=1)
+                # save_2_jsonl(question, result, cluster_chain_of_entities, file_name=args.dataset)
+                output_dict = {"question":question, "results": result, "reasoning_chains": cluster_chain_of_entities}
+                output.append(output_dict)
+            except Exception as e:
+                print("Timeout Error:", str(e)[:250])
+    
+    print("time taken in minutes", (time.time()-start_time)/60)
+    
+    return output
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
@@ -141,6 +171,10 @@ if __name__ == '__main__':
                         default=-1, help="end index.")
     parser.add_argument("--n", type=int,
                         default=2, help="number of processes.")
+    parser.add_argument("--batch_size", type=int,
+                        default=500, help="batch size.")
+    parser.add_argument("--avoid_existing", type=bool,
+                        default=True, help="avoid reprocessing existing rows.")
     args = parser.parse_args()
 
     main(args)
