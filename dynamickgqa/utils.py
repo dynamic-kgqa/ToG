@@ -3,12 +3,16 @@ import sys
 import time
 import json
 import spacy
+from azure_functions import invoke_gpt_endpoint
 
 DYANAMIC_KGQA_PATH = '../data/dynamickgqa_test.json'
 
 def run_llm(prompt, temperature, max_tokens, opeani_api_keys, engine="gpt-4.0"):
     if "llama" in engine.lower():
         sys.exit("Llama is not supported in this version.")  
+    elif "azure" in engine.lower() or "gpt" in engine.lower():
+        # Most likely an Azure model
+        return run_azure_llm(prompt, temperature, max_tokens, opeani_api_keys, engine)
     else:
         client = OpenAI(api_key=opeani_api_keys)
 
@@ -33,6 +37,17 @@ def run_llm(prompt, temperature, max_tokens, opeani_api_keys, engine="gpt-4.0"):
             time.sleep(2)
     # print("end openai")
     return result
+
+def run_azure_llm(prompt, temperature, max_tokens, opeani_api_keys, engine):
+    """
+    Run the Azure model.
+    """
+    if "gpt" in engine.lower():
+        response = invoke_gpt_endpoint(prompt, temperature, max_tokens, opeani_api_keys, engine)
+        return response.choices[0].message.content
+    else:
+        response = invoke_gpt_endpoint(prompt, temperature, max_tokens, opeani_api_keys, engine)
+        return response.choices[0].message.content
 
 def prepare_dataset(dataset_path, question_string='question'):
     with open(dataset_path,encoding='utf-8') as f:
