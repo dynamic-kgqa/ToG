@@ -8,7 +8,8 @@ from openai.types.chat import ChatCompletion
 from dotenv import load_dotenv
 load_dotenv()
 
-endpoint = os.getenv("ENDPOINT_URL", "https://preetam.openai.azure.com/")
+endpoint = os.getenv("ENDPOINT_URL", "https://<>.openai.azure.com/")
+deployment = os.getenv("DEPLOYMENT_NAME", "gpt-4o")
 subscription_key = os.getenv("AZURE_OPENAI_API_KEY")
 
 client = AzureOpenAI(  
