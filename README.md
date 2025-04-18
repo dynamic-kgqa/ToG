@@ -43,7 +43,7 @@ Upon obtaining the result file, such as `ToG_cwq.jsonl`, you should using the `j
 # How to cite
 Since this work is intended to be a baseline for the DynamicKGQA project, please cite our work as follows:
 TBD
-```sh
+```
 @article{dammu2025dynamic,
   title={Dynamic-KGQA: A Scalable Framework for Generating Adaptive Question Answering Datasets},
   author={Dammu, Preetam Prabhu Srikar and Naidu, Himanshu and Shah, Chirag},
@@ -52,7 +52,7 @@ TBD
 }
 ```
 Also please cite the origin paper on ToG as following:
-```sh
+```
 @misc{sun2023thinkongraph,
       title={Think-on-Graph: Deep and Responsible Reasoning of Large Language Model with Knowledge Graph}, 
       author={Jiashuo Sun and Chengjin Xu and Lumingyuan Tang and Saizhuo Wang and Chen Lin and Yeyun Gong and Heung-Yeung Shum and Jian Guo},
